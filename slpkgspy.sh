@@ -31,7 +31,7 @@ MIRROR=ftp://ftp.slackware.no/slackware/slackware-14.1/slackware
 # PKGDOWN: set the path where the packages will be downloaded 
 PKGDOWN=/var/slpkgspy
 
-######################## FUNCTION ########################
+######################## FUNCTIONS ########################
 
 # Function usage
 usage() {
@@ -40,6 +40,7 @@ usage() {
   echo "Download a pkg:       slpkgspy.sh -d [pkg-name|ALL]"
 }
 
+# Function download pkg list
 pkglist() {
 
   # Download packages list
@@ -51,6 +52,7 @@ pkglist() {
   fi
 }
 
+# Function search
 search() {
 
   # Search package
