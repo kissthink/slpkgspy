@@ -7,11 +7,11 @@ With search (-s) option, you can give a pattern as input.
 slpkgspy.sh -s alsa   
 
 <pre>
-[l]: alsa-lib-1.0.27.2-i486-1.txz (Advanced Linux Sound Architecture library)   
-[l]: alsa-oss-1.0.25-i486-1.txz (library/wrapper to use OSS programs with ALSA)   
-[ap]: alsa-utils-1.0.27.1-i486-1.txz (Advanced Linux Sound Architecture utilities)   
-[l]: libao-1.1.0-i486-1.txz (Audio Output library)   
-[l]: sdl-1.2.15-i486-1.txz (Simple DirectMedia Layer library)   
+[l]: alsa-lib-1.0.27.2-i486-1.txz (Advanced Linux Sound Architecture library)
+[l]: alsa-oss-1.0.25-i486-1.txz (library/wrapper to use OSS programs with ALSA)
+[ap]: alsa-utils-1.0.27.1-i486-1.txz (Advanced Linux Sound Architecture utilities)
+[l]: libao-1.1.0-i486-1.txz (Audio Output library)
+[l]: sdl-1.2.15-i486-1.txz (Simple DirectMedia Layer library)
 </pre>
 
 With info (-i) option and download (-d) options, you must specify the package's name.   
