@@ -18,7 +18,7 @@ With info (-i) option and download (-d) options, you must specify the package's 
 
 slpkgspy.sh -i alsa-lib-1.0.27.2-i486-1.txz   
 
-<pre>   
+<pre>
 PACKAGE NAME:  alsa-lib-1.0.27.2-i486-1.txz
 PACKAGE LOCATION:  ./slackware/l
 PACKAGE SIZE (compressed):  396 K
