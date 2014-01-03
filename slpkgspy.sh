@@ -14,7 +14,7 @@
 # 1) MIRROR for your prefer mirror 
 # 2) PKGDOWN where the packages will be downloaded
 #
-# 01/01/2014 (2.0): added info (-i) and download (-d) options
+# 03/01/2014 (2.0): added info (-i) and download (-d) options
 # 18/12/2013 (1.4): fixed bug for pkg description
 # 10/12/2013 (1.2): mktemp for tmp files 
 # 24/07/2013 (1.0): released slpkgspy.sh
@@ -31,7 +31,7 @@ MIRROR=ftp://ftp.slackware.no/slackware/slackware-14.1/slackware
 # PKGDOWN: set the path where the packages will be downloaded 
 PKGDOWN=/var/slpkgspy
 
-######################## FUNCTIONS ########################
+######################## FUNCTION ########################
 
 # Function usage
 usage() {
@@ -40,7 +40,6 @@ usage() {
   echo "Download a pkg:       slpkgspy.sh -d [pkg-name|ALL]"
 }
 
-# Function download pkg list
 pkglist() {
 
   # Download packages list
@@ -52,7 +51,6 @@ pkglist() {
   fi
 }
 
-# Function search
 search() {
 
   # Search package
