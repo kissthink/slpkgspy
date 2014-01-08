@@ -63,7 +63,7 @@ search() {
     for pkg in $(cat ${BUFF}/$PACKAGES_LIST | tail -n+10 | grep "PACKAGE NAME" | awk -F ":" '{print $2}' | tr -d ' ' | sort | uniq)
     do 
         PAKLOC=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 1 -w "$pkg" | tail -1 | sed 's/.*\/.*\///') # package type
-        PAKABS=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 5 -w "$pkg" | tail -n +6 | sed 's/[^(]*(\([^)]*\)).*/\1/') # package description
+        PAKABS=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 5 -w "$pkg" | tail -n +6 | sed 's/[^(]*(\(.*\)).*/\1/') # package description
 
         # Print full packages list
         if [ -z "$PAKABS" ]; then
@@ -90,7 +90,7 @@ search() {
     do
           
          PAKLOC=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 1 -w "$line" | tail -1 | sed 's/.*\/.*\///') # package type
-         PAKABS=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 5 -w "$line" | tail -n +6 | sed 's/[^(]*(\([^)]*\)).*/\1/') # package description
+         PAKABS=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 5 -w "$line" | tail -n +6 | sed 's/[^(]*(\(.*\)).*/\1/') # package description
 
          # Print package list found
          if [ -z "$PAKABS" ]; then
