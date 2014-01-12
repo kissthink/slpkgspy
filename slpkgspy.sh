@@ -41,8 +41,8 @@ usage() {
   echo "Download a pkg:       slpkgspy.sh -d [pkg-name|ALL]"
 }
 
+# Function pkglist
 pkglist() {
-
   # Download packages list
   wget -q -T 30 -t 1 -P $BUFF ${MIRROR}/$PACKAGES_LIST # download the list
 
@@ -52,8 +52,8 @@ pkglist() {
   fi
 }
 
+# Function search
 search() {
-
   # Search package
   SCWD="$1"
   
@@ -107,7 +107,6 @@ search() {
 
 # Function info
 info() {
-
   # Info package
   IPAK="$1" 
 
@@ -128,7 +127,6 @@ info() {
 
 # Function download
 download() {
-
   # Download package
   MYPAK="$1"
 
