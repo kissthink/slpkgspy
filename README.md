@@ -1,7 +1,20 @@
 slpkgspy
 ========
 
-This script finds, gets info and downloads Slackware packages.   
+This tool can find, get info and download Slackware packages.   
+In addition it can get any info about the security advisories.   
+The options are:    
+
+<pre>
+-a [year]: print the security advisories list
+-d [pkg-name|ALL]: download a package
+-i [pkg-name|ALL]: print info for a package
+-k [ssacode]: print info for a SSA package
+-s [pattern|pkg-name|ALL]: seach a package
+-u [url]: download a package from a url
+</pre>
+
+
 With search (-s) option, you can give a pattern as input.    
    
 slpkgspy.sh -s alsa   
@@ -35,6 +48,30 @@ alsa-lib:
 </pre>
 
 You can also use input = ALL to search, get info and download all packages.   
+
+With check security advisories (-a) option, you must specify the year.   
+For clear reasons, only the corrent year and 'current - 1' year are accepted.   
+
+slpkgspy.sh -a 2014    
+
+<pre>
+2014-01-13 - &#91;slackware-security]  libXfont (SSA:2014-013-01)
+2014-01-13 - &#91;slackware-security]  openssl (SSA:2014-013-02)
+2014-01-13 - &#91;slackware-security]  php (SSA:2014-013-03)
+2014-01-13 - &#91;slackware-security]  samba (SSA:2014-013-04)
+2014-01-28 - &#91;slackware-security]  bind (SSA:2014-028-01)
+2014-01-28 - &#91;slackware-security]  mozilla-nss (SSA:2014-028-02)
+</pre>
+
+With info SSA package (-k) option, you must specify the SSA code.   
+
+slpkgspy.sh -k 2014-028-02
+
+(you will see the same output that you see on the webpage for that SSA).    
+
+With url (-u) option, you must specify a direct url to download a package.    
+
+slpkgspy.sh -u ftp://ftp.slackware.com/pub/slackware/slackware-14.1/patches/packages/mozilla-nss-3.15.4-i486-1_slack14.1.txz    
 
 IMPORTANT: into the script you must set two variables:    
 1) MIRROR for your prefer mirror    
