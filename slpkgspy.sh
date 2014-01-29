@@ -4,7 +4,7 @@
 # Copyright: (C) 2013-2014 
 # License: GPLv3
 #
-# 12/01/2014 (3.0): added SSA functions (-a, -k)
+# 29/01/2014 (3.0): added SSA functions (-a, -k)
 #                   added Url function (-u)
 #                   fixed bug on TMP  
 #                   improved the syntax
