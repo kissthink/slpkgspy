@@ -55,12 +55,12 @@ For clear reasons, only the corrent year and 'current - 1' year are accepted.
 slpkgspy.sh -a 2014    
 
 <pre>
-2014-01-13 - &#91;slackware-security]  libXfont (SSA:2014-013-01)
-2014-01-13 - &#91;slackware-security]  openssl (SSA:2014-013-02)
-2014-01-13 - &#91;slackware-security]  php (SSA:2014-013-03)
-2014-01-13 - &#91;slackware-security]  samba (SSA:2014-013-04)
-2014-01-28 - &#91;slackware-security]  bind (SSA:2014-028-01)
-2014-01-28 - &#91;slackware-security]  mozilla-nss (SSA:2014-028-02)
+2014-01-13 - [slackware-security]  libXfont (SSA:2014-013-01)
+2014-01-13 - [slackware-security]  openssl (SSA:2014-013-02)
+2014-01-13 - [slackware-security]  php (SSA:2014-013-03)
+2014-01-13 - [slackware-security]  samba (SSA:2014-013-04)
+2014-01-28 - [slackware-security]  bind (SSA:2014-028-01)
+2014-01-28 - [slackware-security]  mozilla-nss (SSA:2014-028-02)
 </pre>
 
 With info SSA package (-k) option, you must specify the SSA code.   
