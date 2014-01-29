@@ -1,59 +1,76 @@
-# This script finds, gets info and downloads Slackware packages.
-# With search (-s) option, you can give a pattern as input. 
-# With info (-i) and download (-d) options, you must specify the package's name.
-#
-# Below an example for mplayer.
-#
-# Search a pkg:           slpkgspy.sh -s mplayer
-# More info for a pkg:    slpkgspy.sh -i MPlayer-1.1_20120701-i486-2.txz 
-# Download a pkg:         slpkgspy.sh -d MPlayer-1.1_20120701-i486-2.txz
-#
-# You can also use input = ALL to search, get info and download all packages.
-#
-# You must set two variables:
-# 1) MIRROR for your prefer mirror 
-# 2) PKGDOWN where the packages will be downloaded
-#
-# 12/01/2014 (2.2): minor bugfix for pkg with no desc
-# 03/01/2014 (2.0): added info (-i) and download (-d) options
-# 18/12/2013 (1.4): fixed bug for pkg description
-# 10/12/2013 (1.2): mktemp for tmp files 
-# 24/07/2013 (1.0): released slpkgspy.sh
+# slpkgspy.sh
 #
 # Author: Emanuele Orlando (aka kooru)
 # Copyright: (C) 2013-2014 
 # License: GPLv3
 #
-#!/bin/bash
+# 12/01/2014 (3.0): added SSA functions (-a, -k)
+#                   added Url function (-u)
+#                   fixed bug on TMP  
+#                   improved the syntax
+# 12/01/2014 (2.2): minor bugfix for pkg with no desc
+# 03/01/2014 (2.0): added info (-i) and download (-d) options
+# 18/12/2013 (1.4): fixed bug for pkg description
+# 10/12/2013 (1.2): mktemp for tmp files 
+# 24/07/2013 (1.0): released slpkgspy
+#
+#!/bin/sh
 
-# MIRROR: set your prefer mirror 
+# Version
+VERSION="3.0"
+
+# Check for root
+if [ $(id -u) -ne 0 ]; then
+  echo "You must be root!"
+  exit 1
+fi
+
+##### Personal Settings ##### 
+# The url must point to the folder including PACKAGES.TXT 
+# and packages series (a, ap, d, etc)
 MIRROR=ftp://ftp.slackware.no/slackware/slackware-14.1/slackware
 
-# PKGDOWN: set the path where the packages will be downloaded 
+# The path where the packages will be downloaded 
 PKGDOWN=/var/slpkgspy
+#############################
 
 ######################## FUNCTION ########################
 
-# Function usage
+###### Function usage ######
 usage() {
-  echo "Search a pkg:         slpkgspy.sh -s [pattern|pkg-name|ALL]"
-  echo "More info for a pkg:  slpkgspy.sh -i [pkg-name|ALL]" 
-  echo "Download a pkg:       slpkgspy.sh -d [pkg-name|ALL]"
+  echo "--slpkgspy $VERSION--"
+  echo "-a [year]: print the security advisories list"
+  echo "-d [pkg-name|ALL]: download a package"
+  echo "-i [pkg-name|ALL]: print info for a package"
+  echo "-k [ssacode]: print info for a SSA package"
+  echo "-s [pattern|pkg-name|ALL]: seach a package"
+  echo "-u [url]: download a package from a url"
 }
+############################
 
-# Function pkglist
+##### Function pkglist #####
 pkglist() {
   # Download packages list
-  wget -q -T 30 -t 1 -P $BUFF ${MIRROR}/$PACKAGES_LIST # download the list
+  wget -q -T 30 -t 1 -P $TMP ${MIRROR}/$PACKAGES_LIST # download the list
 
-  if [ $? -ne 0 ]; then # if wget gives errors or over 30 secs
+  if [ $? -ne 0 ]; then # with errors or over 30 secs
     echo "Unable to connect to $MIRROR. Please verify if MIRROR exists and/or find $PACKAGES_LIST"
-    exit 1;
+    exit 1
   fi
 }
+############################
 
-# Function search
+###### Function search #####
 search() {
+
+  # Check for special charcters 
+  echo "$1" | grep -q "[A-Z]\|[a-z]\|[0-9]\|-\|."
+
+  if [ $? -ne 0 ]; then
+    echo "Please not use special characters as '[' or '?')"
+    exit 1
+  fi
+
   # Search package
   SCWD="$1"
   
@@ -61,10 +78,10 @@ search() {
   pkglist
 
   if [ "$SCWD" = "ALL" ]; then # full packages list
-    for pkg in $(cat ${BUFF}/$PACKAGES_LIST | tail -n+10 | grep "PACKAGE NAME" | awk -F ":" '{print $2}' | tr -d ' ' | sort | uniq)
+    for pkg in $(cat ${TMP}/$PACKAGES_LIST | sed -n 's/PACKAGE NAME:  \(.*\)/\1/p')
     do 
-        PAKLOC=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 1 -w "$pkg" | tail -1 | sed 's/.*\/.*\///') # package type
-        PAKABS=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 5 -w "$pkg" | tail -n +6 | sed -e 's/.*: \(.*\)/\1/' -e 's/[^(]*(\(.*\)).*/\1/') # package description
+        PAKLOC=$(cat ${TMP}/$PACKAGES_LIST | grep -A 1 -w "$pkg" | tail -1 | sed 's/.*\/.*\///') # package type
+        PAKABS=$(cat ${TMP}/$PACKAGES_LIST | grep -A 5 -w "$pkg" | tail -n +6 | sed -e 's/.*: \(.*\)/\1/' -e 's/[^(]*(\(.*\)).*/\1/') # package description
 
         # Print full packages list
         if [ -z "$PAKABS" ]; then
@@ -77,12 +94,17 @@ search() {
 
   else # searching package from pattern
 
-    for pkg in $(cat ${BUFF}/$PACKAGES_LIST | tail -n+10 | grep -i $SCWD | awk -F ":" '{print $1}' | grep -v PACKAGE | sort | uniq) 
+    for pkg in $(cat ${TMP}/$PACKAGES_LIST | grep -i "$SCWD" | awk -F ":" '{print $1}' | grep -v PACKAGE | sort | uniq) 
     do
-         cat ${BUFF}/$PACKAGES_LIST | grep "PACKAGE NAME:" | grep "$pkg" | awk -F "PACKAGE NAME:" '{print $2}' | tr -d ' ' >> $PAKTMP
+         cat ${TMP}/$PACKAGES_LIST | sed -n "s/PACKAGE NAME:  \(.*$pkg.*\)/\1/p" >> $PAKTMP # tmp list
     done
 
-         if [ -z "$pkg" ]; then # if pkg is zero
+    for pkg in $(cat ${TMP}/$PACKAGES_LIST | sed -n "s/PACKAGE NAME:  \(.*$SCWD.*\)/\1/p" | sort | uniq)
+    do
+         echo "$pkg" >> $PAKTMP # tmp list
+    done
+
+         if [ ! -s $PAKTMP ]; then # if pkg is zero
            echo "${SCWD}: package not found!"
            exit
          fi
@@ -90,8 +112,8 @@ search() {
     for line in $(cat $PAKTMP | sort | uniq) 
     do
           
-         PAKLOC=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 1 -w "$line" | tail -1 | sed 's/.*\/.*\///') # package type
-         PAKABS=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 5 -w "$line" | tail -n +6 | sed -e 's/.*: \(.*\)/\1/' -e 's/[^(]*(\(.*\)).*/\1/') # package description
+         PAKLOC=$(cat ${TMP}/$PACKAGES_LIST | grep -A 1 -w "$line" | tail -1 | sed 's/.*\/.*\///') # package type
+         PAKABS=$(cat ${TMP}/$PACKAGES_LIST | grep -A 5 -w "$line" | tail -n +6 | sed -e 's/.*: \(.*\)/\1/' -e 's/[^(]*(\(.*\)).*/\1/') # package description
 
          # Print package list found
          if [ -z "$PAKABS" ]; then
@@ -104,8 +126,9 @@ search() {
 
    fi
 }
+############################
 
-# Function info
+####### Function info ######
 info() {
   # Info package
   IPAK="$1" 
@@ -114,9 +137,9 @@ info() {
   pkglist
 
   if [ "$IPAK" = "ALL" ]; then
-    cat ${BUFF}/$PACKAGES_LIST # print info for all packages
+    cat ${TMP}/$PACKAGES_LIST | tail -n+10 # print info for all packages
   else
-    PAKINFO=$(cat ${BUFF}/$PACKAGES_LIST | sed -n "/PACKAGE NAME:  ${IPAK}$/,/^$/p")
+    PAKINFO=$(cat ${TMP}/$PACKAGES_LIST | sed -n "/PACKAGE NAME:  ${IPAK}$/,/^$/p")
       if [ -z "$PAKINFO" ]; then
         echo "Package not found!"
       else
@@ -124,35 +147,27 @@ info() {
       fi
   fi
 }
+############################
 
-# Function download
+##### Function download ####
 download() {
   # Download package
   MYPAK="$1"
 
-  # Check if PKGDOWN is empty
-  if [ -z $PKGDOWN ]; then
-    echo "You must specify a path where packages can be downloaded"
-    exit 1;
-  fi
-
-  # Create the path if it not exists
-  [ ! -d $PKGDOWN ] && mkdir -p $PKGDOWN
-
   # Run pkglist
   pkglist
 
-  PAKCHK=$(cat ${BUFF}/$PACKAGES_LIST | grep -w $MYPAK | awk -F ":" '{print $2}' | tr -d ' ')
+  PAKCHK=$(cat ${TMP}/$PACKAGES_LIST | grep -w $MYPAK | awk -F ":" '{print $2}' | tr -d ' ')
 
   if [ "$MYPAK" = "$PAKCHK" ]; then
-    MYPAKLOC=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 1 -w "$MYPAK" | tail -1 | tail -1 | sed 's/.*\/.*\///') # package type
+    MYPAKLOC=$(cat ${TMP}/$PACKAGES_LIST | grep -A 1 -w "$MYPAK" | tail -1 | sed 's/.*\/.*\///') # package type
     wget -P $PKGDOWN ${MIRROR}/${MYPAKLOC}/$MYPAK # download package
   elif [ "$MYPAK" = "ALL" ]; then
-    cat ${BUFF}/PACKAGES.TXT | grep "PACKAGE NAME:" | awk '{print $3}' >> $PAKTMP
+    cat ${TMP}/PACKAGES.TXT | grep "PACKAGE NAME:" | awk '{print $3}' >> $PAKTMP
 
       while read LINEPACK
       do
-        MYPAKLOC=$(cat ${BUFF}/$PACKAGES_LIST | grep -A 1 -w "$LINEPACK" | tail -1 | tail -1 | sed 's/.*\/.*\///') # package type
+        MYPAKLOC=$(cat ${TMP}/$PACKAGES_LIST | grep -A 1 -w "$LINEPACK" | tail -1 | sed 's/.*\/.*\///') # package type
         wget -P $PKGDOWN ${MIRROR}/${MYPAKLOC}/$LINEPACK # download ALL packages
       done < $PAKTMP 
 
@@ -160,15 +175,105 @@ download() {
     echo "Package not found!"
   fi
 }
+############################
+
+##### Function seclist #####
+seclist() {
+  # The years accepted are only the corrent one
+  # and "current - 1"
+  YEAR1=$(date +%Y)
+  YEAR2=$(($YEAR1-1))
+ 
+  # Check if the input is correct 
+  if [ -z $(echo $1 | grep "^20[0-9][0-9]$") ]; then
+    echo "Please insert a correct year (20YY)!"
+    exit 1
+  elif [ $1 -ne $YEAR1 -a $1 -ne $YEAR2 ]; then
+    echo "The years accepted are only the corrent one and 'current - 1'"
+    exit 1
+  fi
+ 
+  # Url
+  URLBASE="http://www.slackware.com/security/"
+  URLIST="list.php?l=slackware-security&y="
+   
+  # Download Slackware security webpage
+  wget -q -T 30 -t 1 -P $TMP "${URLBASE}${URLIST}${1}" # download the page
+
+  if ! grep "SSA:" "${TMP}/${URLIST}${1}" > /dev/null; then # with errors or over 30 secs
+    echo "Unable to connect to ${URLBASE}${URLIST}${YEAR}. Please verify if the url is correct"
+    exit 1
+  fi
+
+  # Print the list
+  tac "${TMP}/${URLIST}${1}" | grep "(SSA:" | sed -e 's/.*\(20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] - .*\)/\1/' | sed -e 's/<.*>//'
+}
+############################
+
+##### Function secinfo #####
+secinfo() {
+
+  # Same thing as in function seclist 
+  YEAR1=$(date +%Y)
+  YEAR2=$(($YEAR1-1))
+
+  # Check if SSA code is correct
+  if [ -z $(echo $1 | grep "^20[0-9][0-9]-[0-9][0-9][0-9]-[0-9][0-9]$") ]; then
+    echo "The SSA code is not correct!"
+    exit 1
+  fi
+
+  # Extract year from SSA code
+  YEAR=$(echo $1 | awk -F "-" '{print $1}')
+  
+  # Check the year
+  if [ $YEAR -ne $YEAR1 -a $YEAR -ne $YEAR2 ]; then
+    echo "Your SSA code seems too old"
+    exit 1
+  fi
+
+  # Url
+  URLBASE="http://www.slackware.com/security/"
+  URLIST="list.php?l=slackware-security&y="
+
+  # Download Slackware security webpage
+  wget -q -T 30 -t 1 -P $TMP "${URLBASE}${URLIST}${YEAR}" # download the page
+
+  # Find and Download the page for the specific SSA code
+  URLINFO=$(cat "${TMP}/${URLIST}${YEAR}"  | grep $1 | sed 's/.*A HREF="\(.*\)".*/\1/')
+  wget -q -T 30 -t 1 -P $TMP "${URLBASE}${URLINFO}"
+
+  if [ ! -f ${TMP}/${URLINFO} ]; then
+    echo "Impossible download the webpage for $1 code"
+    exit 1
+  fi
+
+  # Print the info
+  cat ${TMP}/${URLINFO} | sed -n '/BEGIN PGP/,/END PGP/p'
+}
+############################
+
+##### Function downurl #####
+downurl() {
+  
+  # Url 
+  URL=$1
+
+  wget -T 30 -t 1 -P $PKGDOWN "${URL}" # download the pkg 
+}
+############################
 
 ######################## MAIN ########################
+
+# Clean TMP if still exists 
+rm -r /tmp/buff-sl* 2> /dev/null
 
 # Packages file
 PACKAGES_LIST=PACKAGES.TXT
 
 # Tmp path
-BUFF=$(mktemp -d buff.XXXXXX)
-PAKTMP=$(mktemp ${BUFF}/paktmp.XXXXXX)
+TMP=$(mktemp -d /tmp/buff-sl.XXXXXX)
+PAKTMP=$(mktemp ${TMP}/paktmp.XXXXXX)
 
 # Only one input: your pattern or ALL
 if [ $# -ne 2 ]; then
@@ -181,6 +286,17 @@ if [ -z $MIRROR ]; then
   exit 1
 fi
 
+# Check if PKGDOWN is empty
+if [ -z $PKGDOWN ]; then
+  echo "You must specify a path where the packages can be downloaded"
+  exit 1
+fi
+
+# Create the path if it not exists
+if [ ! -d $PKGDOWN ]; then
+  mkdir -p $PKGDOWN 
+fi
+
 case "$1" in
   "-s") search $2
       ;;
@@ -188,10 +304,15 @@ case "$1" in
       ;;
   "-d") download $2
       ;;
+  "-a") seclist $2
+      ;;
+  "-k") secinfo $2
+      ;;
+  "-u") downurl $2
+      ;;
     *) usage
       ;;
 esac
 
-# Delete buffer
-rm -r $BUFF
-
+# Delete TMP
+rm -r $TMP
