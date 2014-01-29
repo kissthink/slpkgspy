@@ -63,14 +63,6 @@ pkglist() {
 ###### Function search #####
 search() {
 
-  # Check for special charcters 
-  echo "$1" | grep -q "[A-Z]\|[a-z]\|[0-9]\|-\|."
-
-  if [ $? -ne 0 ]; then
-    echo "Please not use special characters as '[' or '?')"
-    exit 1
-  fi
-
   # Search package
   SCWD="$1"
   
