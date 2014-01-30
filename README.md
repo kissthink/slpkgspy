@@ -16,6 +16,7 @@ The options are:
 
 
 With search (-s) option, you can give a pattern as input.    
+The script will search that pattern, not only into the name of the packages but also into the descriptions.    
    
 slpkgspy.sh -s alsa   
 
