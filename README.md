@@ -1,8 +1,8 @@
 slpkgspy
 ========
 
-This tool can find, get info and download Slackware packages.   
-In addition it can get any info about the security advisories.   
+This tool finds, gets info and downloads Slackware packages.   
+In addition it gets info about the security advisories.   
 The options are:    
 
 <pre>
@@ -69,7 +69,7 @@ slpkgspy.sh -k 2014-028-02
 
 (you will see the same output that you see on the webpage for that SSA).    
 
-With url (-u) option, you must specify a direct url to download a package.    
+With url (-u) option, you must specify the direct url of the package.    
 
 slpkgspy.sh -u ftp://ftp.slackware.com/pub/slackware/slackware-14.1/patches/packages/mozilla-nss-3.15.4-i486-1_slack14.1.txz    
 
