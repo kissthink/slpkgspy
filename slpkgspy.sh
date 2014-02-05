@@ -26,7 +26,7 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 ##### Personal Settings ##### 
-# The url must point to the folder including PACKAGES.TXT 
+# The url must point to the folder which contains PACKAGES.TXT 
 # and packages series (a, ap, d, etc)
 MIRROR=ftp://ftp.slackware.no/slackware/slackware-14.1/slackware
 
