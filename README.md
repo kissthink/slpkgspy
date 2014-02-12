@@ -77,4 +77,3 @@ slpkgspy.sh -u ftp://ftp.slackware.com/pub/slackware/slackware-14.1/patches/pack
 IMPORTANT: into the script you must set two variables:    
 1) MIRROR for your prefer mirror    
 2) PKGDOWN where the packages will be downloaded   
-
