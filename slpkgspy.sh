@@ -4,6 +4,7 @@
 # Copyright: (C) 2013-2014 
 # License: GPLv3
 #
+# 12/06/2014 (3.2): added MD5 sums checking for -d option
 # 29/01/2014 (3.0): added SSA functions (-a, -k)
 #                   added Url function (-u)
 #                   fixed bug on TMP  
@@ -17,7 +18,7 @@
 #!/bin/sh
 
 # Version
-VERSION="3.0"
+VERSION="3.2"
 
 # Check for root
 if [ $(id -u) -ne 0 ]; then
@@ -57,6 +58,20 @@ pkglist() {
     echo "Unable to connect to $MIRROR. Please verify if MIRROR exists and/or find $PACKAGES_LIST"
     exit 1
   fi
+}
+############################
+
+##### Function md5list #####
+md5list() {
+  # Download md5 sums file
+  wget -q -T 30 -t 1 -P $TMP ${MIRROR}/$CKMD5 # download the file
+
+  if [ $? -ne 0 ]; then # with errors or over 30 secs
+    echo "Unable to connect to $MIRROR. Please verify if MIRROR exists and/or find $CKMD5"
+    exit 1
+  fi
+  
+  cat ${TMP}/$CKMD5 | sed -n "s%\./.*/%$PKGDOWN\/%p" >> ${TMP}/$MD5 # changing the path
 }
 ############################
 
@@ -149,18 +164,25 @@ download() {
   # Run pkglist
   pkglist
 
+  # Run md5list
+  md5list
+
   PAKCHK=$(cat ${TMP}/$PACKAGES_LIST | grep -w $MYPAK | awk -F ":" '{print $2}' | tr -d ' ')
 
   if [ "$MYPAK" = "$PAKCHK" ]; then
     MYPAKLOC=$(cat ${TMP}/$PACKAGES_LIST | grep -A 1 -w "$MYPAK" | tail -1 | sed 's/.*\/.*\///') # package type
     wget -P $PKGDOWN ${MIRROR}/${MYPAKLOC}/$MYPAK # download package
+    echo -n "Checking MD5 ==> "
+    cat ${TMP}/$MD5 | grep "${MYPAK}$" | md5sum -c - # checksum
   elif [ "$MYPAK" = "ALL" ]; then
     cat ${TMP}/PACKAGES.TXT | grep "PACKAGE NAME:" | awk '{print $3}' >> $PAKTMP
 
-      while read LINEPACK
+      while read LINEPAK
       do
-        MYPAKLOC=$(cat ${TMP}/$PACKAGES_LIST | grep -A 1 -w "$LINEPACK" | tail -1 | sed 's/.*\/.*\///') # package type
-        wget -P $PKGDOWN ${MIRROR}/${MYPAKLOC}/$LINEPACK # download ALL packages
+        MYPAKLOC=$(cat ${TMP}/$PACKAGES_LIST | grep -A 1 -w "$LINEPAK" | tail -1 | sed 's/.*\/.*\///') # package type
+        wget -P $PKGDOWN ${MIRROR}/${MYPAKLOC}/$LINEPAK # download ALL packages
+        echo -n "Checking MD5 ==> "
+        cat ${TMP}/$MD5 | grep "${LINEPAK}$" | md5sum -c - # checksum
       done < $PAKTMP 
 
   else
@@ -262,6 +284,10 @@ rm -r /tmp/buff-sl* 2> /dev/null
 
 # Packages file
 PACKAGES_LIST=PACKAGES.TXT
+
+# MD5 files
+CKMD5=CHECKSUMS.md5 # original
+MD5=MD5.md5 # with path changed
 
 # Tmp path
 TMP=$(mktemp -d /tmp/buff-sl.XXXXXX)
