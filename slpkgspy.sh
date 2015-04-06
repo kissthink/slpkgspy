@@ -1,7 +1,7 @@
 # slpkgspy.sh
 #
 # Author: Emanuele Orlando (aka kooru)
-# Copyright: (C) 2013-2014 
+# Copyright: (C) 2013-2015 
 # License: GPLv3
 #
 # 12/06/2014 (3.2): added MD5 sums checking for -d option
